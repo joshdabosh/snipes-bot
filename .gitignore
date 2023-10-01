@@ -1,2 +1,3 @@
 serviceAccount.json
 token.txt
+.env
