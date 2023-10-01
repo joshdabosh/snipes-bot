@@ -102,6 +102,20 @@ def downvote(message, person_id):
         user_ref.set({"snipes":0})
     
 
+def get_leaderboard(channel_id):
+    ref = db.collection(str(channel_id)).document("users")
+
+    members = []
+
+    for c in ref.collections():
+        members.append([str(c.id), c.document("values").get().to_dict().get("snipes", 0)])
+
+    members.sort(key=lambda x: x[1], reverse=True)
+
+    members = members[:10]
+
+    return members
+
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
@@ -112,8 +126,26 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.channel.name == "snipes" and message.attachments and not message.author.bot:
-        await message.add_reaction(THUMBS_UP)
+    if message.channel.name == "snipes":
+        if message.content == "!leaderboard":
+            top10 = get_leaderboard(message.channel.id)
+
+            if top10 == []:
+                await message.channel.send("No users yet!")
+                return
+
+            response = ""
+
+            for idx, (user_id, _) in enumerate(top10):
+                user = await client.fetch_user(user_id)
+                response += f"{idx+1}. {user}\n"
+
+            await message.channel.send(response)
+
+            return
+        
+        if message.attachments and not message.author.bot:
+            await message.add_reaction(THUMBS_UP)
 
 
 @client.event
