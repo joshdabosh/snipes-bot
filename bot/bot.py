@@ -136,9 +136,9 @@ async def on_message(message):
 
             response = ""
 
-            for idx, (user_id, _) in enumerate(top10):
+            for idx, (user_id, amt) in enumerate(top10):
                 user = await client.fetch_user(user_id)
-                response += f"{idx+1}. {user}\n"
+                response += f"{idx+1}. {user} - {amt}\n"
 
             await message.channel.send(response)
 
